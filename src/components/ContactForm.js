@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import axios from 'axios'
 
 const ContactForm = () => {
   const [data, setData] = useState();
@@ -8,11 +9,12 @@ const ContactForm = () => {
   });
   const onSubmit = (data) => {
     setData(data);
+    axios.post('https://reqres.in/api/users', data)
+      .then(res => {
+        console.log(res.data)
+        setData(res.data)
+      })
   };
-
-  // const handleChange = event => {
-  //   setData({ ...data, [event.target.name]: event.target.value });
-  // };
 
   return (
     <div className="App">
@@ -23,7 +25,6 @@ const ContactForm = () => {
             id='firstName'
             name="firstName"
             placeholder="Edd"
-            // onChange={event => handleChange(event)}
             ref={register({ required: true, maxLength: 3 })}
           />
           {errors.firstName && (

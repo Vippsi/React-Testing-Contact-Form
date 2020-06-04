@@ -1,6 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ContactForm from './ContactForm'
+import axios from "axios";
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+
+
 
 test('Contact Returns new "user" object', () => {
     render(<ContactForm/>)
@@ -18,5 +23,34 @@ test('Contact Returns new "user" object', () => {
     const submitButton = screen.getByTestId(/submit/i)
     fireEvent.click(submitButton)
 
-    const newUser = screen.findByDisplayValue(/data/i)
+    // 
+
+    
+})
+
+
+
+const server = setupServer(
+    rest.get('https://reqres.in/api/users', (req, res, ctx) => {
+        return res(ctx.json({firstName: 'jonathan', lastName: 'thornton', email:'jonathan@jonathan.com', message:'Hello this is a message' }))
+    })
+
+)
+
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+
+
+test('test server', async () => {
+    server.use(
+        rest.get('https://reqres.in/api/users', (req, res, ctx) => {
+            return(ctx.status(500))
+        })
+    )
+    render(<ContactForm/>)
+
+    await waitFor(() => {
+        screen.findByDisplayValue(/data/i)
+    })
 })
